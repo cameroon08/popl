@@ -1,0 +1,160 @@
+def a_project(projectID):
+    supervisor = False
+    projectID=projectID
+
+    def the_project(request):
+        nonlocal supervisor
+        if request == "supervisor": return lambda: supervisor
+        elif request == "set_supervisor": return set_sv
+        elif request == "projectID": return projectID
+        else: return "the_project: unknown request "+request
+#
+    def set_sv(sv):
+        nonlocal supervisor
+        supervisor = sv
+        return True
+#
+    return the_project
+def project_supervisor(project):
+    return project("supervisor")
+4
+def set_supervisor(project, supervisor):
+    project('set_supervisor')(supervisor)
+    
+def projectID(project):
+    return project('projectID')
+
+def a_student(studentID):
+    project= False
+    studentID=studentID
+
+    def the_student(request):
+        if request == "studentID": return studentID
+        elif request == 'allocation': return project('projectID')
+        elif request == 'choose_project': return set_proj
+        elif request == 'reset_proj': return reset_proj
+        else: return "the_student: unknown request "+request
+
+    def set_proj(ID):
+        nonlocal project
+        if project==False:
+            project=ID
+            return True
+        else:
+            return False
+
+    def reset_proj():
+        nonlocal project
+        project==False
+        return True
+
+    return the_student
+
+def allocation(student):
+    return student('allocation')
+
+def reset_proj(student):
+    return student('reset_proj')
+
+def choose_project(student,project):
+    return student('choose_project')(project)
+
+def studentID(student):
+    return student('studentID')
+
+def a_supervisor(supervisorID):
+    supervisorID=supervisorID
+    all_projs=set()
+    allocated_proj=dict()
+    quota=6
+
+    def the_supervisor(request):
+        nonlocal quota
+        if request == "supervisorID": return supervisorID
+        elif request == 'quota': return quota
+        elif request == 'under': return is_underloaded()
+        elif request == 'increment': return inc_quota()
+        elif request == 'decrement': return dec_quota()
+        elif request == 'add_proj': return add_proj
+        elif request == 'allocate': return allocate()
+        elif request == 'deallocate': return deallocate()
+        else: return "the_supervisor: unknown request "+request
+
+    def is_underloaded():
+        nonlocal quota
+        if quota ==0:
+            return False
+        else:
+            return True
+
+    def inc_quota():
+        nonlocal quota
+        quota+=1
+        return True
+
+    def inc_quota():
+        nonlocal quota
+        if quota==0:
+            return False
+        else:
+            quota-=1
+            return True
+
+    def add_proj(project,supervisor):
+        nonlocal supervisorID
+        nonlocal allocated_proj
+        if project_supervisor(project)==False:
+            set_supervisor(project, supervisorID)
+            all_projs.add(project('projectID'))
+            set_supervisor(project, supervisor)
+            return True
+        else:
+            return False
+
+    def allocate(project,student):
+        nonlocal all_projs
+        nonlocal allocated_proj
+        if projectID(project) in all_projs and project_supervisor(project)==None and is_underloaded(supervisor)==True:
+            all_projs.remove(projectID(project))
+            decrement_quota(supervisor)
+            allocated_proj[projectID(project)]=[studentID(student)]
+            choose_project(student,project)
+        else:
+            return False
+
+    def deallocate(project,student):
+        nonlocal all_projs
+        nonlocal allocated_proj
+    return the_supervisor
+
+def supervisorID(supervisor):
+    return supervisor('supervisorID')
+
+def quota(supervisor):
+    return supervisor('quota')
+
+def is_underloaded(supervisor):
+    return supervisor('under')
+
+def increment_quota(supervisor):
+    return supervisor('increment')
+
+def decrement_quota(supervisor):
+    return supervisor('decrement')
+
+def add_project(supervisor, project):
+    return supervisor('add_proj')(project,supervisor)
+
+def allocate_project(supervisor,project,student):
+    return supervisor('allocate')(project,student)
+
+def deallocate_project(supervisor,project,student):
+    return supervisor('deallocate')(project,student)
+
+
+proj1 = a_project("dlk01")
+proj2 = a_project("dlk02")
+stud1 = a_student("johnsilver")
+stud2 = a_student("robinsoncrusoe")
+sup1 = a_supervisor("kazakov")
+sup2 = a_supervisor("wood")
